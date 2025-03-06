@@ -4,12 +4,10 @@ import os
 from PIL import Image
 
 # Load API key from environment variable or Streamlit secrets
-API_KEY = os.getenv("GEMINI_API_KEY") or st.secrets["GEMINI_API_KEY"]
+API_KEY = "AIzaSyBsq5Kd5nJgx2fejR77NT8v5Lk3PK4gbH8"
 
-# Configure Gemini
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel('gemini-1.5-flash')
-
 # Streamlit app title
 st.title("📷 Photo Caption Generator")
 
