@@ -6,8 +6,10 @@ from PIL import Image
 # Load API key from environment variable or Streamlit secrets
 API_KEY = "AIzaSyBsq5Kd5nJgx2fejR77NT8v5Lk3PK4gbH8"
 
+# Configure Gemini
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel('gemini-1.5-flash')
+
 # Streamlit app title
 st.title("📷 Photo Caption Generator")
 
@@ -29,7 +31,7 @@ if uploaded_file is not None:
             response = model.generate_content(
                 contents=[
                     "Generate a creative and descriptive caption for this image:",
-                    image_bytes
+                    {"mime_type": uploaded_file.type, "data": image_bytes}
                 ]
             )
 
