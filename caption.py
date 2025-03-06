@@ -1,36 +1,42 @@
-import openai
+import streamlit as st
+import google.generativeai as genai
+import os
 from PIL import Image
-import requests
-from io import BytesIO
 
-# Set your OpenAI API key
-openai.api_key = "your_openai_api_key_here"
+# Load API key from environment variable or Streamlit secrets
+API_KEY = os.getenv("GEMINI_API_KEY") or st.secrets["GEMINI_API_KEY"]
 
-# Function to generate a caption for an image
-def generate_photo_caption(image_url):
-    # Step 1: Analyze the image (you can use an image recognition API here if needed)
-    # For simplicity, we'll assume the image is already described or use a placeholder.
-    image_description = "A beautiful sunset over the mountains with a calm lake in the foreground."
+# Configure Gemini
+genai.configure(api_key=API_KEY)
+model = genai.GenerativeModel('gemini-1.5-flash')
 
-    # Step 2: Use OpenAI GPT to generate a caption
-    prompt = f"Generate a short and engaging caption for this photo: {image_description}"
-    
-    response = openai.Completion.create(
-        engine="text-davinci-003",  # Use the appropriate GPT model
-        prompt=prompt,
-        max_tokens=50,  # Limit the caption length
-        n=1,  # Number of captions to generate
-        stop=None,  # No specific stop sequence
-        temperature=0.7,  # Controls creativity (0 = strict, 1 = creative)
-    )
+# Streamlit app title
+st.title("📷 Photo Caption Generator")
 
-    # Extract the generated caption
-    caption = response.choices[0].text.strip()
-    return caption
+# File uploader for images
+uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
 
-# Example image URL
-image_url = "https://example.com/sunset.jpg"
+if uploaded_file is not None:
+    # Display the uploaded image
+    image = Image.open(uploaded_file)
+    st.image(image, caption="Uploaded Image", use_column_width=True)
 
-# Generate and print the caption
-caption = generate_photo_caption(image_url)
-print("Generated Caption:", caption)
+    # Generate caption for the image
+    if st.button("Generate Caption"):
+        try:
+            # Convert image to bytes
+            image_bytes = uploaded_file.getvalue()
+
+            # Use Gemini to generate a caption
+            response = model.generate_content(
+                contents=[
+                    "Generate a creative and descriptive caption for this image:",
+                    image_bytes
+                ]
+            )
+
+            # Display the generated caption
+            st.subheader("Generated Caption:")
+            st.write(response.text)
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
