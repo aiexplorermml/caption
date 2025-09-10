@@ -3,10 +3,10 @@ from PIL import Image
 import requests
 import os
 
-# Load token safely from secrets
+# SAFE: Load token from Streamlit secrets
 API_TOKEN = st.secrets.get("HF_API_TOKEN", "")
 
-headers = {"Authorization": f"Bearer {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}"}
+headers = {"Authorization": f"Bearer {API_TOKEN}"}
 API_URL = "https://api-inference.huggingface.co/models/Salesforce/blip-image-captioning-large"
 
 def generate_caption(image_bytes):
@@ -28,9 +28,9 @@ if not API_TOKEN:
     st.error("❌ API token not configured. Please follow the instructions below.")
     st.info("""
     **How to set up:**
-    1. Get free token from: https://huggingface.co/settings/tokens
-    2. Create a file called `.streamlit/secrets.toml`
-    3. Add this line: `HF_API_TOKEN = "your_token_here"`
+    1. Create a folder called `.streamlit` in your project
+    2. Inside it, create a file called `secrets.toml`
+    3. Add this line: `HF_API_TOKEN = "hf_your_token_here"`
     4. Restart the app
     """)
 else:
