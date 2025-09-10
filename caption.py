@@ -1,10 +1,12 @@
 import streamlit as st
 from PIL import Image
 import requests
-import os
+import configparser
 
-# SAFE: Load token from Streamlit secrets
-API_TOKEN = st.secrets.get("HF_API_TOKEN", "")
+# Load token from config.ini file
+config = configparser.ConfigParser()
+config.read('config.ini')
+API_TOKEN = config['DEFAULT']['HF_API_TOKEN']
 
 headers = {"Authorization": f"Bearer {API_TOKEN}"}
 API_URL = "https://api-inference.huggingface.co/models/Salesforce/blip-image-captioning-large"
@@ -24,25 +26,15 @@ def generate_caption(image_bytes):
 # Streamlit app
 st.title("📷 FREE Photo Caption Generator")
 
-if not API_TOKEN:
-    st.error("❌ API token not configured. Please follow the instructions below.")
-    st.info("""
-    **How to set up:**
-    1. Create a folder called `.streamlit` in your project
-    2. Inside it, create a file called `secrets.toml`
-    3. Add this line: `HF_API_TOKEN = "hf_your_token_here"`
-    4. Restart the app
-    """)
-else:
-    uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
+uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
+
+if uploaded_file is not None:
+    image = Image.open(uploaded_file)
+    st.image(image, caption="Uploaded Image", use_column_width=True)
     
-    if uploaded_file is not None:
-        image = Image.open(uploaded_file)
-        st.image(image, caption="Uploaded Image", use_column_width=True)
-        
-        if st.button("🎯 Generate Caption"):
-            with st.spinner("AI is analyzing your image..."):
-                image_bytes = uploaded_file.getvalue()
-                caption = generate_caption(image_bytes)
-                st.subheader("📝 Generated Caption:")
-                st.success(caption)
+    if st.button("🎯 Generate Caption"):
+        with st.spinner("AI is analyzing your image..."):
+            image_bytes = uploaded_file.getvalue()
+            caption = generate_caption(image_bytes)
+            st.subheader("📝 Generated Caption:")
+            st.success(caption)
